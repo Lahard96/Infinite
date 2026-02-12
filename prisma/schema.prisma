@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Skin {
+  id        String   @id @default(uuid())
+  ownerId   String
+  name      String
+  fileUrl   String
+  type      SkinType
+  createdAt DateTime @default(now())
+}
+
+enum SkinType {
+  BACKGROUND
+  THEME
+}
+
+model ProfileCustomization {
+  userId        String @id
+  activeSkinId  String?
+  backgroundUrl String?
+  fontFamily    String?
+  accentColor   String?
+}
+
+model Comment {
+  id         String        @id @default(uuid())
+  userId     String
+  targetId   String // videoId or liveId
+  targetType CommentTarget
+  content    String
+  createdAt  DateTime      @default(now())
+}
+
+enum CommentTarget {
+  VIDEO
+  LIVE
+}
+
+model CreatorPayoutSettings {
+  creatorId  String     @id
+  stripeId   String
+  payoutType PayoutType
+  updatedAt  DateTime   @updatedAt
+}
+
+enum PayoutType {
+  INSTANT
+  WEEKLY
+  MONTHLY
+}
+
+model UserBlock {
+  id        String   @id @default(uuid())
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+}
+
+model ScheduledContent {
+  id        String         @id @default(uuid())
+  creatorId String
+  contentId String
+  publishAt DateTime
+  status    ScheduleStatus
+}
+
+enum ScheduleStatus {
+  PENDING
+  PUBLISHED
+  CANCELLED
+}
+
+model CreatorGuide {
+  creatorId String @id
+  content   Json
+}
+
+model ProtectedContent {
+  id        String @id @default(uuid())
+  contentId String
+  password  String // hashed
+}
+
+model Upload {
+  id        String     @id @default(uuid())
+  ownerId   String
+  type      UploadType
+  fileUrl   String
+  isAdult   Boolean    @default(false)
+  createdAt DateTime   @default(now())
+}
+
+enum UploadType {
+  VIDEO
+  AUDIO
+  IMAGE
+  DOCUMENT
+}
+
+model Creator {
+  id                       String                   @id
+  isAdultVerified          Boolean                  @default(false)
+  adultVerificationStatus  AdultVerificationStatus  @default(PENDING)
+  adultEnabled             Boolean                  @default(false)
+}
+
+model AdultVerification {
+  id               String                   @id @default(uuid())
+  creatorId        String
+  idDocumentUrl    String
+  selfieUrl        String
+  submittedAt      DateTime                 @default(now())
+  reviewedByAdminId String?
+  reviewedAt       DateTime?
+  status           AdultVerificationStatus  @default(PENDING)
+}
+
+enum AdultVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model CreatorTier {
+  id                         String  @id @default(uuid())
+  name                       String
+  monthlyPrice               Int
+  uploadLimit                String
+  schedulingAccess           String
+  primetimeAccess            String
+  adRevenueShare             Float?
+  liveStreamLimitHours       Int?
+  ppvIncluded                Int?
+  passwordProtectionIncluded Boolean @default(false)
+  subleasingEnabled          Boolean @default(false)
+}
+
+
+model Rental {
+  id       String       @id @default(uuid())
+  creatorId String
+  slotType RentalSlotType
+  price    Float
+}
+
+enum RentalSlotType {
+  ONE_HOUR
+  THREE_HOUR
+  FULL_DAY
+}
+
+model AddOn {
+  id       String        @id @default(uuid())
+  name     String
+  price    Float
+  duration AddOnDuration
+}
+
+enum AddOnDuration {
+  DAILY
+  MONTHLY
+  BIWEEKLY
+}
